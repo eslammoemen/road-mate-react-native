@@ -6,6 +6,9 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "paths": {
+      "@/fonts/*": ["./assets/fonts/*"],
+      "@/images/*": ["./assets/images/*"],
+      "@/colors/*": ["./assets/colors/*"],
       "@/*": [
         "./*"
       ]

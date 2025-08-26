@@ -1,0 +1,16 @@
+export default {
+  pickup: "Pickup Location",
+  pickupDescription: 'this is the place where driver will pick you up',
+  fromCity: 'From City',
+  toCity: 'To City',
+  carDetails: 'Car Details',
+  paymentType: 'Payment Type',
+  totalCost: 'Total Cost',
+  tested: 'Drug Tested, Vacined',
+  reserveNow: 'Reserve Now',
+  CancelTrip: 'Cancel Trip',
+  numberOfSeats: 'Number of Seats',
+  driverName: 'Driver',
+  tripCancelled: 'Trip Cancelled Successfully',
+  tripReserved: 'Trip Reserved Successfully',
+}

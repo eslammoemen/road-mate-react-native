@@ -1,4 +1,4 @@
-package com.xera.capp
+package com.anonymous.myapp
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

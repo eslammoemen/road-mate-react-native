@@ -4,30 +4,31 @@ import {
   SafeAreaView,
   TextInput,
   TouchableOpacity,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
 import { React, useState, useEffect } from "react";
 import { Colors } from "@/colors/colors";
 import { fonts } from "@/fonts/fonts";
 import { Ionicons } from "@expo/vector-icons"; // or use react-native-vector-icons
-import bcrypt from "bcryptjs";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { store } from "../../../../firebase";
 import { router } from "expo-router";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { storeString } from "../../../../Models/storage"; // Adjust the import path as necessary
 import { LoginResponse, DataReponse } from "../Model/interfaces";
 import { URLS } from "@/app/Screens/URLS";
-import * as SecureStore from "expo-secure-store"
+import * as SecureStore from "expo-secure-store";
+import { showMessage } from "react-native-flash-message";
+
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const [secure, setSecure] = useState(true);
+  const phoneRegex = /^(10|11|12|15)\d{7}$/;
+
   const [form, setFrom] = useState({
-    email: "",
+    phone: "",
     password: "",
   });
   const [validForm, setValidForm] = useState({
-    email: false,
+    phone: false,
     password: false,
   });
 
@@ -41,20 +42,29 @@ const Login = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({email: form.email, password: form.password}),
+          body: JSON.stringify({ phone: `+20${form.phone}`, password: form.password }),
         }
       );
-      const data: DataReponse<LoginResponse> = await response.json()
+      const data: DataReponse<LoginResponse> = await response.json();
       console.log("Login response data:", data);
-      if (data.data.token !== undefined) {
+      if (response.status === 200 && data?.data?.token) {
         await SecureStore.setItemAsync("userToken", data.data.token);
         // await storeString(data.data.token, "userToken");
         router.replace("/Screens/Features/HomeTrips/View/HomeTrips");
+      } else {
+        throw new Error(data.message || "Login failed");
       }
-      setLoading(false);
     } catch (error) {
+      showMessage({
+        type: "danger",
+        message: error instanceof Error ? error.message : String(error),
+        duration: 3000,
+        icon: "danger",
+        floating: true,
+        style: { borderRadius: 10, marginTop: 20 },
+      });
+    } finally {
       setLoading(false);
-      console.error("Error logging in:", error.message);
     }
   };
 
@@ -89,17 +99,26 @@ const Login = () => {
               paddingHorizontal: 10,
               borderWidth: 0.7,
               borderColor:
-                !validForm.email && form.email.length > 0
+                !validForm.phone && form.phone.length > 0
                   ? "red"
                   : "transparent",
             },
           ]}
         >
           <Text style={{ fontFamily: "Poppins-Medium", fontSize: 14 }}>
-            email
+            phone
+          </Text>
+          <Text
+            style={{
+              fontFamily: "Poppins-Medium",
+              fontSize: 14,
+              marginLeft: 5,
+            }}
+          >
+            +20
           </Text>
           <TextInput
-            placeholder="email@example.com"
+            placeholder="10|11|12|15xxxxxxxx"
             style={{
               marginLeft: 15,
               fontFamily: "Poppins-Medium",
@@ -109,12 +128,13 @@ const Login = () => {
               color: Colors.secodary,
             }}
             placeholderTextColor={Colors.secodary}
-            value={form.email}
+            value={form.phone}
+            keyboardType="phone-pad"
             onChangeText={(text) => {
-              setFrom({ ...form, email: text });
+              setFrom({ ...form, phone: text });
               setValidForm({
                 ...validForm,
-                email: text.includes("@") && text.includes("."),
+                phone: phoneRegex.test(form.phone),
               });
             }}
           ></TextInput>
@@ -167,25 +187,58 @@ const Login = () => {
           </TouchableOpacity>
         </View>
       </View>
-      {loading ? (<ActivityIndicator style={{marginTop: 30, marginHorizontal: 20}} size="large" color={Colors.primary} />) : (<TouchableOpacity
-        style={{
-          backgroundColor: Colors.primary,
-          borderRadius: 8,
-          height: 45,
-          justifyContent: "center",
-          alignItems: "center",
-          marginHorizontal: 20,
-          marginTop: 30,
-        }}
-        onPress={loginuser}
-      >
-        <Text
-          style={{ color: "white", fontFamily: "Poppins-Bold", fontSize: 16 }}
+      {loading ? (
+        <ActivityIndicator
+          style={{ marginTop: 30, marginHorizontal: 20 }}
+          size="large"
+          color={Colors.primary}
+        />
+      ) : (
+        <TouchableOpacity
+          style={{
+            backgroundColor: Colors.primary,
+            borderRadius: 8,
+            height: 45,
+            justifyContent: "center",
+            alignItems: "center",
+            marginHorizontal: 20,
+            marginTop: 30,
+          }}
+          onPress={loginuser}
         >
-          Login
+          <Text
+            style={{ color: "white", fontFamily: "Poppins-Bold", fontSize: 16 }}
+          >
+            Login
+          </Text>
+        </TouchableOpacity>
+      )}
+      <View style={{ marginLeft: 20, marginTop: 40 }}>
+        <Text
+          style={{
+            marginTop: 20,
+            marginBottom: 0,
+          }}
+        >
+          dotn't have an account
         </Text>
-      </TouchableOpacity>)}
-      
+        <TouchableOpacity
+          onPress={() => {
+            router.push("/Screens/Features/Auth/Register/View/Register");
+          }}
+        >
+          <Text
+            style={{
+              color: Colors.primary,
+              marginTop: 0,
+              textDecorationLine: "underline",
+              fontFamily: "Poppins-Bold",
+            }}
+          >
+            Sign up
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };

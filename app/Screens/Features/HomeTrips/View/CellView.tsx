@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View,I18nManager } from "react-native";
 import { Colors } from "@/colors/colors";
 import { Spaces } from "@/colors/spaces";
-export default CellView = ({ title, subtitle, style }) => {
+export default CellView = ({ title, subtitle, style, Sstyle }) => {
   return (
     <View
       style={[
@@ -16,7 +16,7 @@ export default CellView = ({ title, subtitle, style }) => {
     >
       <Text style={styles.subtitles}>{title}</Text>
       <Text
-        style={{ color: 'black', fontSize: 13 }}
+        style={[ Sstyle, {color: 'black', fontSize: 13}]}
       >
         {subtitle}{" "}
       </Text>

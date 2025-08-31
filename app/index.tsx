@@ -7,20 +7,26 @@ import * as Updates from "expo-updates";
 import * as Localization from "expo-localization";
 import { Text, View } from "react-native";
 import i18n from "../i18n";
-import * as SecureStore from "expo-secure-store"
+import * as SecureStore from "expo-secure-store";
+import FlashMessage from "react-native-flash-message";
+
 export default function Index() {
   const [fontsLoaded] = useFonts(customFonts);
   const [ready, setReady] = useState(false);
-  const [hasToken, setHasToken] = useState<boolean | null>(null);
+  const [hasToken, setHasToken] = useState<boolean>(false);
 
   useEffect(() => {
     const prepareApp = async () => {
       try {
         const token = await SecureStore.getItemAsync("userToken");
-        setHasToken(!!token); // true if token exists
+        if (token !== null) {
+          setHasToken(true);
+        } else {
+          throw new Error("No token found");
+        }
       } catch {
         setHasToken(false);
-      } 
+      }
     };
     const enableRTL = async () => {
       //Force RTL for Arabic
@@ -33,18 +39,28 @@ export default function Index() {
 
     enableRTL();
     prepareApp();
+    console.log("Current locale:", fontsLoaded, hasToken);
   }, []);
 
-  if (!fontsLoaded) {
+    if (!fontsLoaded || hasToken === null) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text> App Not Ready</Text>
+        <Text>Loading...</Text>
       </View>
-    ); // or show splash/loading
+    );
   }
-  if (fontsLoaded && !hasToken) {
-    return <Redirect href="/Screens/Features/Auth/Login/View/Login" />;
-  } else if (fontsLoaded && hasToken) {
-    return <Redirect href="/Screens/Features/HomeTrips/View/HomeTrips" />;
-  }
+
+  return (
+  <>
+   {/* 🔀 Only redirect once everything is ready */}
+      {hasToken ? (
+        <Redirect href="/Screens/Features/HomeTrips/View/HomeTrips" />
+      ) : (
+        <Redirect href="/Screens/Features/Auth/Login/View/Login" />
+      )}
+
+      {/* ✅ one global FlashMessage */}
+      <FlashMessage position="top" />
+  </>
+);
 }

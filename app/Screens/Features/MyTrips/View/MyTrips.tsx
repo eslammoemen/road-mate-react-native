@@ -17,8 +17,6 @@ import { Spaces } from "@/colors/spaces";
 import images from "@/colors/images";
 import i18n from "../../../../../i18n";
 import { Moment } from "moment";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { store } from "../../../firebase";
 import { TripModel } from "../../../Models/TripModel";
 import { DataReponse, TripsModel } from "../../Auth/Login/Model/interfaces";
 import { URLS } from "@/app/Screens/URLS";
@@ -109,6 +107,7 @@ const MyTrips = () => {
                       "HH:mm a"
                     )
                   }
+                  Sstyle={{ fontFamily: "Poppins-Medium", fontSize: 14 }}
                 />
                 <CellView
                   title={i18n.t("toCity")}
@@ -120,6 +119,7 @@ const MyTrips = () => {
                       "hh:mm a"
                     )
                   }
+                  Sstyle={{ fontFamily: "Poppins-Medium", fontSize: 14 }}
                 />
                 <CellView
                   title={i18n.t("carDetails")}
@@ -143,6 +143,7 @@ const MyTrips = () => {
                 <CellView
                   title={i18n.t("totalCost")}
                   subtitle={"EGP " + item.price.toFixed(1)}
+                  Sstyle={{ fontFamily: "Poppins-SemiBold", fontSize: 14 }}
                 />
                 <TouchableOpacity
                   style={{

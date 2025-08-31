@@ -1,4 +1,4 @@
-package com.xera.capp
+package com.anonymous.myapp
 
 import android.app.Application
 import android.content.res.Configuration

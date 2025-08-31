@@ -1,7 +1,6 @@
 import { format, parse } from "date-fns";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -13,18 +12,21 @@ import {
   TouchableOpacity,
   View,
   I18nManager,
+  Pressable, Animated, Dimensions
 } from "react-native";
 import { Colors } from "@/colors/colors";
 import { Spaces } from "@/colors/spaces";
 import images from "@/colors/images";
 import { useTripStore } from "../../../tripModelStore";
-import { store } from "../../../firebase";
 import CellView from "./CellView";
 import moment from "moment";
 import i18n from "../../../../../i18n";
 import "moment/locale/ar";
 import Orders from "@/images/orders.svg"; // Adjust the import based on your SVG handling
 import Notifications from "@/images/notificaitions.svg";
+import MenuImage from "@/images/menuImage.svg";
+import { Menu } from "@/app/Screens/menu";
+
 import { DataReponse, TripsModel } from "../../Auth/Login/Model/interfaces";
 import { URLS } from "../../../URLS";
 interface DaysModel {
@@ -38,6 +40,27 @@ const HomeTrips = () => {
   const [selectedId, setSelectedId] = useState<string>("");
   const selectedDate = useRef<string>("");
   const [data, setData] = useState<TripsModel[]>([]);
+  //
+  const [menuVisible, setMenuVisible] = useState(false);
+  const screenWidth = Dimensions.get("window").width;
+  const translateX = useState(new Animated.Value(-screenWidth))[0];
+  //
+  const openMenu = () => {
+    setMenuVisible(true);
+    Animated.timing(translateX, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeMenu = () => {
+    Animated.timing(translateX, {
+      toValue: -screenWidth,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setMenuVisible(false));
+  };
   //
   useEffect(() => {
     const someDays: DaysModel[] = [];
@@ -92,7 +115,7 @@ const HomeTrips = () => {
       end={{ x: -2.0, y: 3.2 }}
       style={styles.linearGradient}
     >
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1, marginTop: 20 }}>
         <View
           style={{
             flexDirection: "row",
@@ -101,7 +124,25 @@ const HomeTrips = () => {
             marginTop: 15,
           }}
         >
-          <View style={{ width: 44.44, height: 44.44, marginHorizontal: 20 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", marginHorizontal: 20}}>
+           <View style={{ width: 44.44, height: 44.44 }}>
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: Colors.highlight,
+                borderRadius: "50%",
+              }}
+              onPress={() => {
+                openMenu();
+              }}
+            >
+              <MenuImage width={24} height={24}></MenuImage>
+            </TouchableOpacity>
+          </View>
+           
+          <View style={{ width: 44.44, height: 44.44, marginLeft: 10 }}>
             <TouchableOpacity
               style={{
                 flex: 1,
@@ -116,6 +157,7 @@ const HomeTrips = () => {
             >
               <Notifications width={24} height={24}></Notifications>
             </TouchableOpacity>
+          </View>
           </View>
           <Text style={styles.title}>Road Mate</Text>
           <View style={{ width: 44.44, height: 44.44, marginHorizontal: 20 }}>
@@ -220,6 +262,7 @@ const HomeTrips = () => {
                           "hh:mm a"
                         )
                       }
+                      Sstyle={{ fontFamily: "Poppins-Medium", fontSize: 14 }}
                     />
                     <CellView
                       title={i18n.t("toCity")}
@@ -235,6 +278,7 @@ const HomeTrips = () => {
                           "hh:mm a"
                         )
                       }
+                      Sstyle={{ fontFamily: "Poppins-Medium", fontSize: 14 }}
                     />
                     <CellView
                       title={i18n.t("driverName")}
@@ -256,6 +300,7 @@ const HomeTrips = () => {
                     <CellView
                       title={i18n.t("totalCost")}
                       subtitle={"EGP " + item.price.toFixed(1)}
+                      Sstyle={{ fontFamily: "Poppins-SemiBold", fontSize: 14 }}
                     />
                     <TouchableOpacity
                       style={{
@@ -293,6 +338,30 @@ const HomeTrips = () => {
             />
           )}
         </View>
+        {menuVisible && (
+        <Animated.View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            bottom: 0,
+            width: screenWidth * 0.8,
+            height: '100%',
+            backgroundColor: "white",
+            transform: [{ translateX }],
+            elevation: 10, // shadow on Android
+            shadowColor: "#000", // shadow on iOS
+            shadowOpacity: 0.2,
+            shadowOffset: { width: 2, height: 0 },
+          }}
+        >
+          <Menu hideMenu={closeMenu}/>
+          {/* <Text style={{ fontSize: 22, margin: 20 }}>Menu</Text>
+          <Pressable onPress={closeMenu}>
+            <Text style={{ color: "blue", margin: 20 }}>Close</Text>
+          </Pressable> */}
+        </Animated.View>
+      )}
       </SafeAreaView>
     </LinearGradient>
   );
@@ -318,7 +387,7 @@ const styles = StyleSheet.create({
   listStyle: {
     // padding: 10,
     maxHeight: 50,
-    paddingLeft: 10,
+    paddingHorizontal: 10,
   },
   itemsStyle: {
     // backgroundColor: "#f9c2ff",

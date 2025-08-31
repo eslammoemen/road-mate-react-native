@@ -22,9 +22,6 @@ import Call from "@/images/call.svg"; // Adjust the import based on your SVG han
 import CellView from "../../HomeTrips/View/CellView"; // Adjust the import path as necessary
 import { format, parse } from "date-fns";
 import { LeftArrow } from "@/images/left.arrow.svg"; // Adjust the import based on your SVG handling
-import { Skeleton } from "moti/skeleton";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { store } from "../../../firebase";
 import { Platform } from "react-native";
 import { Background } from "@react-navigation/elements";
 import i18n from "../../../../../i18n";
@@ -111,15 +108,16 @@ const TripDetails = () => {
         throw new Error("Failed to reserve trip");
       }
       const data = await response.json();
-      fetchOneTrip();
+      // fetchOneTrip();
       showMessage({
         type: "success",
         message: fetchedTrip.isReserved ? i18n.t("tripCancelled") : i18n.t("tripReserved"),
         duration: 3000,
-        icon: fetchedTrip.isReserved ? "danger" : "success",
+        icon: "success",
         floating: true,
         style: { borderRadius: 10, marginTop: 20 },
       })
+      fetchedTrip.isReserved = !fetchedTrip.isReserved;
     } catch (error) {
       console.error("Error reserving trip:", error);
     } finally {
@@ -267,6 +265,7 @@ const TripDetails = () => {
                   "hh:mm a"
                 )
               }
+              Sstyle={{ fontFamily: "Poppins-Medium", fontSize: 14 }}
             />
             <CellView
               style={{ width: "95%" }}
@@ -283,6 +282,7 @@ const TripDetails = () => {
                   "hh:mm a"
                 )
               }
+              Sstyle={{ fontFamily: "Poppins-Medium", fontSize: 14 }}
             />
             <CellView
               style={{ width: "95%" }}
@@ -293,6 +293,7 @@ const TripDetails = () => {
               style={{ width: "95%" }}
               title={i18n.t("totalCost")}
               subtitle={"EGP " + fetchedTrip.price.toFixed(1)}
+              Sstyle={{ fontFamily: "Poppins-SemiBold", fontSize: 14 }}
             />
           </View>
           {reserveLoading ? (<ActivityIndicator style= {{height: 45, marginTop: 10}} size="large" color={Colors.primary} />) : (
@@ -311,7 +312,6 @@ const TripDetails = () => {
             color={Colors.primary}
             backgroundColor={Colors.primary}
             onPress={() => {
-              toggleReservation();
               reserveTrip();
             }}
             

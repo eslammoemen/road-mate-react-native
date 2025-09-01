@@ -21,7 +21,7 @@ import { showMessage } from "react-native-flash-message";
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const [secure, setSecure] = useState(true);
-  const phoneRegex = /^(10|11|12|15)\d{7}$/;
+  const phoneRegex = /^(10|11|12|15)\d{8}$/;
 
   const [form, setFrom] = useState({
     phone: "",
@@ -33,6 +33,17 @@ const Login = () => {
   });
 
   const loginuser = async () => {
+    if (validForm.phone === false || validForm.password === false) {
+      showMessage({
+        type: "danger",
+        message: "Please enter valid phone and password (min 8 characters).",
+        duration: 3000,
+        icon: "danger",
+        floating: true,
+        style: { borderRadius: 10, marginTop: 20 },
+      });
+      return;
+    }
     setLoading(true);
     try {
       const response = await fetch(
@@ -134,7 +145,7 @@ const Login = () => {
               setFrom({ ...form, phone: text });
               setValidForm({
                 ...validForm,
-                phone: phoneRegex.test(form.phone),
+                phone: phoneRegex.test(text),
               });
             }}
           ></TextInput>

@@ -11,19 +11,22 @@ import { format, parse } from "date-fns";
 
 import { useFocusEffect } from "expo-router";
 import { ReactElement, useState, useEffect, useCallback } from "react";
-import CellView from "../../HomeTrips/View/CellView";
+import CellView from "@/app/Screens/Features/HomeTrips/View/CellView";
 import { Colors } from "@/colors/colors";
 import { Spaces } from "@/colors/spaces";
 import images from "@/colors/images";
-import i18n from "../../../../../i18n";
+import i18n from "@/i18n";
 import { Moment } from "moment";
-import { TripModel } from "../../../Models/TripModel";
-import { DataReponse, TripsModel } from "../../Auth/Login/Model/interfaces";
+import { DataReponse, TripsModel } from "@/app/Screens/Features/Auth/Login/Model/interfaces";
 import { URLS } from "@/app/Screens/URLS";
 import * as SecureStore from "expo-secure-store"
 import { BackView } from "@/app/Screens/BackView";
 import { Platform } from "react-native";
+import { useTripStore } from "@/app/Screens/tripModelStore";
+import {router} from 'expo-router'
+import ItemView from "@/app/Screens/itemView";
 
+import { homeStyles } from "@/app/Screens/Features/HomeTrips/View/HomeTrips";
 const MyTrips = () => {
 
   const [data, setData] = useState<TripsModel[]>([]);
@@ -87,91 +90,13 @@ const MyTrips = () => {
           }}
           data={data}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => {
-                // item pressed
-                //  useTripStore.getState().setTrp(item);
-                //  router.push(
-                //    "/Screens/Features/TripDetails/View/TripDetails"
-                //  );
-              }}
-            >
-              <View style={styles.shadowBox}>
-                <CellView
-                  title={i18n.t("fromCity")}
-                  subtitle={
-                    item.fromCity.name +
-                    " " +
-                    format(
-                      parse(item.departureTime, "yyyy-MM-dd'T'HH:mm:ss.SSS", new Date()),
-                      "HH:mm a"
-                    )
-                  }
-                  Sstyle={{ fontFamily: "Poppins-Medium", fontSize: 14 }}
-                />
-                <CellView
-                  title={i18n.t("toCity")}
-                  subtitle={
-                    item.toCity.name +
-                    " " +
-                    format(
-                      parse(item.arrivalTime, "yyyy-MM-dd'T'HH:mm:ss.SSS", new Date()),
-                      "hh:mm a"
-                    )
-                  }
-                  Sstyle={{ fontFamily: "Poppins-Medium", fontSize: 14 }}
-                />
-                <CellView
-                  title={i18n.t("carDetails")}
-                  subtitle={
-                    item.car.plateNumber
-                  }
-                />
-                {/* <CellView
-                  title={i18n.t("paymentType")}
-                  subtitle={item.paymentType}
-                /> */}
-                <View
-                  style={{
-                    borderStyle: "dashed",
-                    borderWidth: 1,
-                    borderColor: Colors.highlight,
-                    marginTop: Spaces.top + 5,
-                    marginBottom: Spaces.bottom + 5,
-                  }}
-                />
-                <CellView
-                  title={i18n.t("totalCost")}
-                  subtitle={"EGP " + item.price.toFixed(1)}
-                  Sstyle={{ fontFamily: "Poppins-SemiBold", fontSize: 14 }}
-                />
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: Colors.primary,
-                    borderRadius: 8,
-                    height: 45,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginTop: 10,
-                  }}
-                  color={Colors.primary}
-                  backgroundColor={Colors.primary}
-                  onPress={() => {
-                    console.log("Track Order Pressed");
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "white",
-                      fontFamily: "Poppins-Bold",
-                      fontSize: 13,
-                    }}
-                  >
-                    Trip Route
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableOpacity>
+           <ItemView
+           onPress={()=>{
+              useTripStore.getState().setTrpid(item.id);
+              router.push("/Screens/Features/TripDetails/View/TripDetails");
+           }}
+           item={item}
+           />
           )}
         ></FlatList>
       ) : (
@@ -192,6 +117,7 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: Spaces.margin,
     borderWidth: 1,
+    backgroundColor: Colors.lightGrey,
     borderColor: Colors.highlight,
     justifyContent: "center",
     borderRadius: 10,

@@ -17,7 +17,9 @@ import { useTripStore } from "../../../tripModelStore";
 import { router } from "expo-router";
 import images from "@/images";
 import { Colors } from "@/colors/colors";
-import MapView, { Marker, PROVIDER_GOOGLE, PROVIDER_DEFAULT } from "react-native-maps";
+import MapView, {
+  Marker,
+} from "react-native-maps";
 import Call from "@/images/call.svg"; // Adjust the import based on your SVG handling
 import CellView from "../../HomeTrips/View/CellView"; // Adjust the import path as necessary
 import { format, parse } from "date-fns";
@@ -45,8 +47,9 @@ const TripDetails = () => {
   const [loading, setLoading] = useState(true);
   const tripid = useTripStore((state) => state.tripid) as number;
   const [fetchedTrip, setFetchedTrip] = useState<TripsModel>(null);
-  
+
   const [reserveLoading, setReserveLoading] = useState(false);
+  const [tripShown, setTripShown] = useState(true);
 
   const makeCall = () => {
     const phoneNumber = `tel:${fetchedTrip.car.driver.user.phone}`; // Replace with your number
@@ -71,7 +74,6 @@ const TripDetails = () => {
         }
       );
       const data: DataReponse<TripsModel> = await response.json();
-      console.log("Fetched Trip Data:", data);
       setFetchedTrip(data.data);
     } catch (error) {
       console.error("Error fetching trips:", error);
@@ -79,6 +81,14 @@ const TripDetails = () => {
       setLoading(false); // always stop loading
     }
   };
+
+  useEffect(() => {
+    if (fetchedTrip) {
+      if (fetchedTrip.numberOfSeats == 0 && !fetchedTrip.isReserved) {
+        setTripShown(false);
+      }
+    }
+  }, [fetchedTrip]);
   const toggleReservation = () => {
     setFetchedTrip((prev) => ({
       ...prev,
@@ -95,31 +105,38 @@ const TripDetails = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            authorization:
-              "Bearer " +
-              token
+            authorization: "Bearer " + token,
           },
           body: JSON.stringify({
             tripId: tripid, // Assuming you have the trip ID available
           }),
         }
       );
-      if (!response.ok) {
-        throw new Error("Failed to reserve trip");
-      }
       const data = await response.json();
-      // fetchOneTrip();
+      if (data.status !== 200) {
+        throw new Error(data.message || "Reservation failed");
+      }
+      fetchOneTrip();
       showMessage({
         type: "success",
-        message: fetchedTrip.isReserved ? i18n.t("tripCancelled") : i18n.t("tripReserved"),
+        message: fetchedTrip.isReserved
+          ? i18n.t("tripCancelled")
+          : i18n.t("tripReserved"),
         duration: 3000,
         icon: "success",
         floating: true,
         style: { borderRadius: 10, marginTop: 20 },
-      })
-      fetchedTrip.isReserved = !fetchedTrip.isReserved;
+      });
+      // fetchedTrip.isReserved = !fetchedTrip.isReserved;
     } catch (error) {
-      console.error("Error reserving trip:", error);
+      showMessage({
+        type: "danger",
+        message: error instanceof Error ? error.message : String(error),
+        duration: 3000,
+        icon: "danger",
+        floating: true,
+        style: { borderRadius: 10, marginTop: 20 },
+      });
     } finally {
       setReserveLoading(false);
     }
@@ -213,8 +230,10 @@ const TripDetails = () => {
             }}
           >
             <MapView
-              style={{ flex: 1 }}
-              provider={PROVIDER_DEFAULT} // Use Google Maps
+              style={{
+                ...StyleSheet.absoluteFillObject,
+                flex: 1,
+              }}
               initialRegion={{
                 latitude: fetchedTrip?.fromCity.latitude,
                 longitude: fetchedTrip?.fromCity.longitude,
@@ -231,7 +250,7 @@ const TripDetails = () => {
               <Marker
                 coordinate={{
                   latitude: fetchedTrip?.fromCity.latitude,
-                longitude: fetchedTrip?.fromCity.longitude,
+                  longitude: fetchedTrip?.fromCity.longitude,
                 }}
                 title={i18n.t("pickup")}
                 description={i18n.t("pickupDescription")}
@@ -296,39 +315,46 @@ const TripDetails = () => {
               Sstyle={{ fontFamily: "Poppins-SemiBold", fontSize: 14 }}
             />
           </View>
-          {reserveLoading ? (<ActivityIndicator style= {{height: 45, marginTop: 10}} size="large" color={Colors.primary} />) : (
-          <TouchableOpacity
-            style={{
-              backgroundColor: fetchedTrip?.isReserved
-                ? Colors.red
-                : Colors.primary,
-              borderRadius: 10,
-              height: 45,
-              width: "90%",
-              justifyContent: "center",
-              alignItems: "center",
-              marginTop: 10,
-            }}
-            color={Colors.primary}
-            backgroundColor={Colors.primary}
-            onPress={() => {
-              reserveTrip();
-            }}
-            
-          >
-            
-            <Text
-              style={{
-                color: "white",
-                fontFamily: "Poppins-Bold",
-                fontSize: 13,
-              }}
-            >
-              {fetchedTrip.isReserved
-                ? i18n.t("CancelTrip")
-                : i18n.t("reserveNow")}
-            </Text>
-          </TouchableOpacity>)}
+          {tripShown ? (
+            reserveLoading ? (
+              <ActivityIndicator
+                style={{ height: 45, marginTop: 10 }}
+                size="large"
+                color={Colors.primary}
+              />
+            ) : (
+              <TouchableOpacity
+                style={{
+                  backgroundColor: fetchedTrip?.isReserved
+                    ? Colors.red
+                    : Colors.primary,
+                  borderRadius: 10,
+                  height: 45,
+                  width: "90%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginTop: 10,
+                }}
+                color={Colors.primary}
+                backgroundColor={Colors.primary}
+                onPress={() => {
+                  reserveTrip();
+                }}
+              >
+                <Text
+                  style={{
+                    color: "white",
+                    fontFamily: "Poppins-Bold",
+                    fontSize: 13,
+                  }}
+                >
+                  {fetchedTrip.isReserved
+                    ? i18n.t("CancelTrip")
+                    : i18n.t("reserveNow")}
+                </Text>
+              </TouchableOpacity>
+            )
+          ) : null}
         </View>
       </ScrollView>
     </SafeAreaView>

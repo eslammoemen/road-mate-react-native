@@ -12,7 +12,9 @@ import {
   TouchableOpacity,
   View,
   I18nManager,
-  Pressable, Animated, Dimensions
+  Pressable,
+  Animated,
+  Dimensions,
 } from "react-native";
 import { Colors } from "@/colors/colors";
 import { Spaces } from "@/colors/spaces";
@@ -29,6 +31,7 @@ import { Menu } from "@/app/Screens/menu";
 
 import { DataReponse, TripsModel } from "../../Auth/Login/Model/interfaces";
 import { URLS } from "../../../URLS";
+import ItemView from "@/app/Screens/itemView";
 interface DaysModel {
   formatted: string;
   original: string;
@@ -113,7 +116,7 @@ const HomeTrips = () => {
       colors={["#FFFF", "#FFFFFF"]}
       start={{ x: 1, y: 0 }}
       end={{ x: -2.0, y: 3.2 }}
-      style={styles.linearGradient}
+      style={homeStyles.linearGradient}
     >
       <SafeAreaView style={{ flex: 1, marginTop: 20 }}>
         <View
@@ -124,42 +127,48 @@ const HomeTrips = () => {
             marginTop: 15,
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center", marginHorizontal: 20}}>
-           <View style={{ width: 44.44, height: 44.44 }}>
-            <TouchableOpacity
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: Colors.highlight,
-                borderRadius: "50%",
-              }}
-              onPress={() => {
-                openMenu();
-              }}
-            >
-              <MenuImage width={24} height={24}></MenuImage>
-            </TouchableOpacity>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginHorizontal: 20,
+            }}
+          >
+            <View style={{ width: 44.44, height: 44.44 }}>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: Colors.highlight,
+                  borderRadius: "50%",
+                }}
+                onPress={() => {
+                  openMenu();
+                }}
+              >
+                <MenuImage width={24} height={24}></MenuImage>
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ width: 44.44, height: 44.44, marginLeft: 10 }}>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: Colors.highlight,
+                  borderRadius: "50%",
+                }}
+                onPress={() => {
+                  router.push("/Screens/Features/MyTrips/View/MyTrips");
+                }}
+              >
+                <Notifications width={24} height={24}></Notifications>
+              </TouchableOpacity>
+            </View>
           </View>
-           
-          <View style={{ width: 44.44, height: 44.44, marginLeft: 10 }}>
-            <TouchableOpacity
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: Colors.highlight,
-                borderRadius: "50%",
-              }}
-              onPress={() => {
-                router.push("/Screens/Features/MyTrips/View/MyTrips");
-              }}
-            >
-              <Notifications width={24} height={24}></Notifications>
-            </TouchableOpacity>
-          </View>
-          </View>
-          <Text style={styles.title}>Road Mate</Text>
+          <Text style={homeStyles.title}>Road Mate</Text>
           <View style={{ width: 44.44, height: 44.44, marginHorizontal: 20 }}>
             <TouchableOpacity
               style={{
@@ -181,13 +190,13 @@ const HomeTrips = () => {
           inverted={I18nManager.isRTL}
           showsHorizontalScrollIndicator={false}
           horizontal={true}
-          style={styles.listStyle}
+          style={homeStyles.listStyle}
           keyExtractor={(item) => item.original}
           data={days}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={[
-                styles.itemGardStyle,
+                homeStyles.itemGardStyle,
                 {
                   backgroundColor:
                     item.original === selectedId
@@ -205,7 +214,7 @@ const HomeTrips = () => {
             >
               <Text
                 style={[
-                  styles.itemsStyle,
+                  homeStyles.itemsStyle,
                   {
                     color:
                       item.original === selectedId ? "white" : Colors.secodary,
@@ -238,97 +247,15 @@ const HomeTrips = () => {
               }}
               data={data}
               renderItem={({ item }) => (
-                <TouchableOpacity
+                <ItemView
                   onPress={() => {
-                    // item pressed
                     useTripStore.getState().setTrpid(item.id);
                     router.push(
                       "/Screens/Features/TripDetails/View/TripDetails"
                     );
                   }}
-                >
-                  <View style={styles.shadowBox}>
-                    <CellView
-                      title={i18n.t("fromCity")}
-                      subtitle={
-                        item.fromCity.name +
-                        " " +
-                        format(
-                          parse(
-                            item.departureTime,
-                            "yyyy-MM-dd'T'HH:mm:ss.SSS",
-                            new Date()
-                          ),
-                          "hh:mm a"
-                        )
-                      }
-                      Sstyle={{ fontFamily: "Poppins-Medium", fontSize: 14 }}
-                    />
-                    <CellView
-                      title={i18n.t("toCity")}
-                      subtitle={
-                        item.toCity.name +
-                        " " +
-                        format(
-                          parse(
-                            item.arrivalTime,
-                            "yyyy-MM-dd'T'HH:mm:ss.SSS",
-                            new Date()
-                          ),
-                          "hh:mm a"
-                        )
-                      }
-                      Sstyle={{ fontFamily: "Poppins-Medium", fontSize: 14 }}
-                    />
-                    <CellView
-                      title={i18n.t("driverName")}
-                      subtitle={item.car.driver.user.name}
-                    />
-                    <CellView
-                      title={i18n.t("numberOfSeats")}
-                      subtitle={item.numberOfSeats.toString()}
-                    />
-                    <View
-                      style={{
-                        borderStyle: "dashed",
-                        borderWidth: 1,
-                        borderColor: Colors.highlight,
-                        marginTop: Spaces.top + 5,
-                        marginBottom: Spaces.bottom + 5,
-                      }}
-                    />
-                    <CellView
-                      title={i18n.t("totalCost")}
-                      subtitle={"EGP " + item.price.toFixed(1)}
-                      Sstyle={{ fontFamily: "Poppins-SemiBold", fontSize: 14 }}
-                    />
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: Colors.primary,
-                        borderRadius: 8,
-                        height: 45,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        marginTop: 10,
-                      }}
-                      color={Colors.primary}
-                      backgroundColor={Colors.primary}
-                      onPress={() => {
-                        console.log("Track Order Pressed");
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: "white",
-                          fontFamily: "Poppins-Bold",
-                          fontSize: 13,
-                        }}
-                      >
-                        Trip Route
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </TouchableOpacity>
+                  item={item}
+                />
               )}
             ></FlatList>
           ) : (
@@ -339,29 +266,29 @@ const HomeTrips = () => {
           )}
         </View>
         {menuVisible && (
-        <Animated.View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            bottom: 0,
-            width: screenWidth * 0.8,
-            height: '100%',
-            backgroundColor: "white",
-            transform: [{ translateX }],
-            elevation: 10, // shadow on Android
-            shadowColor: "#000", // shadow on iOS
-            shadowOpacity: 0.2,
-            shadowOffset: { width: 2, height: 0 },
-          }}
-        >
-          <Menu hideMenu={closeMenu}/>
-          {/* <Text style={{ fontSize: 22, margin: 20 }}>Menu</Text>
+          <Animated.View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              bottom: 0,
+              width: screenWidth * 0.8,
+              height: "100%",
+              backgroundColor: "white",
+              transform: [{ translateX }],
+              elevation: 10, // shadow on Android
+              shadowColor: "#000", // shadow on iOS
+              shadowOpacity: 0.2,
+              shadowOffset: { width: 2, height: 0 },
+            }}
+          >
+            <Menu hideMenu={closeMenu} />
+            {/* <Text style={{ fontSize: 22, margin: 20 }}>Menu</Text>
           <Pressable onPress={closeMenu}>
             <Text style={{ color: "blue", margin: 20 }}>Close</Text>
           </Pressable> */}
-        </Animated.View>
-      )}
+          </Animated.View>
+        )}
       </SafeAreaView>
     </LinearGradient>
   );
@@ -369,7 +296,7 @@ const HomeTrips = () => {
 
 export default HomeTrips;
 
-const styles = StyleSheet.create({
+const homeStyles = StyleSheet.create({
   subtitles: {
     color: Colors.secodary,
     fontWeight: "bold",
@@ -417,6 +344,7 @@ const styles = StyleSheet.create({
   shadowBox: {
     flex: 1,
     margin: Spaces.margin,
+    backgroundColor: Colors.lightGrey,
     borderWidth: 1,
     borderColor: Colors.highlight,
     justifyContent: "center",
@@ -424,3 +352,5 @@ const styles = StyleSheet.create({
     padding: Spaces.padding,
   },
 });
+
+export { homeStyles };

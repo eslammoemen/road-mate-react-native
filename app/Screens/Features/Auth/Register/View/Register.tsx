@@ -23,7 +23,7 @@ interface RegisterResponse {
 }
 const Register = () => {
   const [secure, setSecure] = useState(true);
-  const phoneRegex = /^(10|11|12|15)\d{7}$/;
+  const phoneRegex = /^(10|11|12|15)\d{8}$/;
   const [loading, setLoading] = useState(false);
 
   const [form, setFrom] = useState({
@@ -42,6 +42,17 @@ const Register = () => {
   });
 
   const registerUser = async () => {
+    if (validForm.phone === false || validForm.password === false || validForm.name === false || validForm.email === false || validForm.confirmPassword === false) {
+      showMessage({
+        type: "danger",
+        message: "Please fill all fields correctly.",
+        duration: 3000,
+        icon: "danger",
+        floating: true,
+        style: { borderRadius: 10, marginTop: 20 },
+      });
+      return;
+    }
     setLoading(true);
     const params = {
       name: form.name,
@@ -194,7 +205,7 @@ const Register = () => {
               setFrom({ ...form, phone: text });
               setValidForm({
                 ...validForm,
-                phone: phoneRegex.test(form.phone),
+                phone: phoneRegex.test(text),
               });
             }}
           ></TextInput>
